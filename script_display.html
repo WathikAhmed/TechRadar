@@ -36,23 +36,33 @@ Your goal is to turn trending tech topics into engaging 60-second scripts with h
 
 Based on this topic: ${title}
 
-Write a full video script for a vertical short-form video (under 60 seconds) that includes:
+Write a script for a 60-second short-form video.
 
-A strong hook in the first 3 seconds to stop scrolling
+⚠️ Important: Only give me the exact spoken words I would say in the video — no visual directions, no voiceover labels, no stage cues. Just pure dialogue.
 
-Simple, conversational breakdown of what happened and why it matters
+The tone should be casual, punchy, and confident — like I’m speaking directly to the viewer.
 
-A unique or controversial insight (optional but great for comments)
+Structure the script to include:
 
-A strong ending with a call to action (CTA) to follow or engage
+A strong hook in the first 3 seconds
 
-The tone should be: punchy, confident, and clear — like you're speaking to curious but non-technical people who want to stay ahead of the tech curve.
+A simple breakdown of what’s happening
 
-Output should be formatted clearly with timestamps or sections (e.g., Hook, Breakdown, Insight, CTA).
+Why it matters
 
-Add title suggestions, hashtags, and a suggested pinned comment at the end.
+A surprising or controversial insight (optional)
 
-If useful, mention what kind of visuals or b-roll would match each section.`
+A powerful CTA at the end (e.g., “Follow for more” or a question for comments)
+
+Return only the spoken script. At the end, give me:
+
+3 title suggestions
+
+A video description
+
+3–5 relevant hashtags
+
+A suggested pinned comment`
                 : `Create a 5-minute YouTube script about: ${title}. Include intro, main points, and conclusion. Make it informative and engaging. Raw script only`;
             
             try {
