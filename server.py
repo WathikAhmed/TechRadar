@@ -56,6 +56,56 @@ class CrawlerHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 self.wfile.write(json.dumps({'error': str(e)}).encode())
+        elif self.path == '/api/get-transcript':
+            try:
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+                
+                transcript = self.get_youtube_transcript(data['url'])
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                
+                self.wfile.write(json.dumps({'transcript': transcript}).encode())
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': str(e)}).encode())
+    
+    def get_youtube_transcript(self, url):
+        try:
+            # Extract video ID from URL
+            video_id = None
+            if 'youtube.com/watch?v=' in url:
+                video_id = url.split('v=')[1].split('&')[0]
+            elif 'youtu.be/' in url:
+                video_id = url.split('youtu.be/')[1].split('?')[0]
+            
+            if not video_id:
+                return "Could not extract video ID from URL"
+            
+            # Try to get transcript from YouTube's auto-generated captions
+            transcript_url = f'https://www.youtube.com/api/timedtext?lang=en&v={video_id}'
+            headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'}
+            
+            req = urllib.request.Request(transcript_url, headers=headers)
+            with urllib.request.urlopen(req) as response:
+                transcript_xml = response.read().decode('utf-8')
+            
+            # Basic XML parsing to extract text
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(transcript_xml)
+            transcript_text = ' '.join([elem.text or '' for elem in root.findall('.//text')])
+            
+            return transcript_text[:2000]  # Limit to 2000 chars
+        except Exception as e:
+            print(f"Transcript error: {str(e)}")
+            return "Transcript not available"
     
     def generate_script_with_gemini(self, prompt):
         api_key = os.getenv('GOOGLE_GEMINI_API_KEY')

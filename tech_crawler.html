@@ -86,8 +86,8 @@
                                     ${item.date} (${item.daysOld} day${item.daysOld !== 1 ? 's' : ''} old)
                                 </div>
                                 <div style="margin-top: 10px;">
-                                    <button class="script-btn" onclick="generateScript('${item.title.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'tiktok', this)">📱 TikTok Script</button>
-                                    <button class="script-btn" onclick="generateScript('${item.title.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'youtube', this)">🎥 YouTube Script</button>
+                                    <button class="script-btn" onclick="generateScript('${item.title.replace(/'/g, "\\'").replace(/"/g, '\\"')}', '${item.url}', 'tiktok', this)">📱 TikTok Script</button>
+                                    <button class="script-btn" onclick="generateScript('${item.title.replace(/'/g, "\\'").replace(/"/g, '\\"')}', '${item.url}', 'youtube', this)">🎥 YouTube Script</button>
                                 </div>
 
                             </div>
@@ -107,13 +107,13 @@
         // Auto-refresh every 5 minutes
         setInterval(loadTrending, 300000);
         
-        function generateScript(title, type, buttonElement) {
+        function generateScript(title, videoUrl, type, buttonElement) {
             const originalText = buttonElement.innerHTML;
             buttonElement.innerHTML = '⏳ Generating...';
             buttonElement.disabled = true;
             
             // Open new tab with script display page
-            const url = `script_display.html?title=${encodeURIComponent(title)}&type=${type}`;
+            const url = `script_display.html?title=${encodeURIComponent(title)}&url=${encodeURIComponent(videoUrl)}&type=${type}`;
             window.open(url, '_blank');
             
             // Reset button after short delay

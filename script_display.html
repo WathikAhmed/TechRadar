@@ -20,21 +20,40 @@
         async function loadScript() {
             const params = new URLSearchParams(window.location.search);
             const title = params.get('title');
+            const videoUrl = params.get('url');
             const type = params.get('type');
             
-            if (!title || !type) {
+            if (!title || !videoUrl || !type) {
                 document.getElementById('content').innerHTML = '<h2>Error: Missing parameters</h2>';
                 return;
             }
             
             document.title = `${type.toUpperCase()} Script`;
             
+            // First get transcript
+            let transcript = '';
+            try {
+                const transcriptResponse = await fetch('http://localhost:8000/api/get-transcript', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: videoUrl })
+                });
+                const transcriptData = await transcriptResponse.json();
+                transcript = transcriptData.transcript || '';
+            } catch (error) {
+                console.log('Could not fetch transcript:', error);
+            }
+            
             const prompt = type === 'tiktok' 
                 ? `You're a viral tech content creator making short-form videos for YouTube Shorts and TikTok.
 
 Your goal is to turn trending tech topics into engaging 60-second scripts with high watch retention.
 
-Based on this topic: ${title}
+Video Title: ${title}
+Video URL: ${videoUrl}
+${transcript ? `Video Transcript: ${transcript}` : ''}
+
+Based on this video content
 
 Write a script for a 60-second short-form video.
 
@@ -65,7 +84,11 @@ A video description
 A suggested pinned comment`
                 : `You're a successful YouTube tech content creator making a 5–10 minute video designed to educate, entertain, and retain viewers.
 
-Based on this topic: ${title},
+Video Title: ${title}
+Video URL: ${videoUrl}
+${transcript ? `Video Transcript: ${transcript}` : ''}
+
+Based on this video content
 
 Write a full spoken script for a YouTube video that I can read directly to camera.
 
@@ -115,7 +138,7 @@ A pinned comment suggestion that encourages discussion`;
                 
                 document.getElementById('content').innerHTML = `
                     <h2>${type.toUpperCase()} Script</h2>
-                    <h3>${title}</h3>
+                    <h3><a href="${videoUrl}" target="_blank">${videoUrl}</a></h3>
                     <div class="script-content">${data.script}</div>
                 `;
             } catch (error) {
