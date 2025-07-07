@@ -63,7 +63,41 @@ A video description
 3–5 relevant hashtags
 
 A suggested pinned comment`
-                : `Create a 5-minute YouTube script about: ${title}. Include intro, main points, and conclusion. Make it informative and engaging. Raw script only`;
+                : `You're a successful YouTube tech content creator making a 5–10 minute video designed to educate, entertain, and retain viewers.
+
+Based on this topic: ${title},
+
+Write a full spoken script for a YouTube video that I can read directly to camera.
+
+⚠️ Very important:
+
+Only include the words I will actually say
+
+No stage directions, visuals, cues, voiceover tags, or scene breakdowns
+
+The tone should be natural, engaging, slightly informal, and confident — like I’m explaining something cool to a smart friend who’s not super technical.
+
+Structure the script to include:
+
+A strong hook in the first 30 seconds to keep people watching
+
+A clear introduction of what the video will cover
+
+The main content, broken down step by step or idea by idea
+
+A unique insight, controversy, or opinion to get people thinking or commenting
+
+A solid wrap-up and call to action to like, comment, and subscribe
+
+At the end, give me:
+
+3 catchy video titles
+
+video description
+
+3–5 relevant hashtags
+
+A pinned comment suggestion that encourages discussion`;
             
             try {
                 const response = await fetch('http://localhost:8000/api/generate-script', {
