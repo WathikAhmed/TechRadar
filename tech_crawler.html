@@ -17,6 +17,8 @@
         .score { color: #c8860d; font-weight: 600; }
         .refresh-btn { background: #d4a574; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; margin: 10px; transition: background 0.3s; }
         .refresh-btn:hover { background: #c8860d; }
+        .script-btn { background: #8b7355; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 8px; }
+        .script-btn:hover { background: #6f4e37; }
         .loading { text-align: center; color: #8b7355; padding: 40px; }
         h1 { color: #6f4e37; text-shadow: 1px 1px 2px rgba(212, 165, 116, 0.3); }
         a { color: #4a3728; text-decoration: none; }
@@ -83,6 +85,10 @@
                                     ${item.engagement.toLocaleString()} ${item.source === 'Reddit' ? 'comments' : 'interactions'} • 
                                     ${item.date} (${item.daysOld} day${item.daysOld !== 1 ? 's' : ''} old)
                                 </div>
+                                <div style="margin-top: 10px;">
+                                    <button class="script-btn" onclick="generateScript('${item.title.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'tiktok', this)">📱 TikTok Script</button>
+                                    <button class="script-btn" onclick="generateScript('${item.title.replace(/'/g, "\\'").replace(/"/g, '\\"')}', 'youtube', this)">🎥 YouTube Script</button>
+                                </div>
 
                             </div>
                         </div>`;
@@ -100,6 +106,22 @@
         
         // Auto-refresh every 5 minutes
         setInterval(loadTrending, 300000);
+        
+        function generateScript(title, type, buttonElement) {
+            const originalText = buttonElement.innerHTML;
+            buttonElement.innerHTML = '⏳ Generating...';
+            buttonElement.disabled = true;
+            
+            // Open new tab with script display page
+            const url = `script_display.html?title=${encodeURIComponent(title)}&type=${type}`;
+            window.open(url, '_blank');
+            
+            // Reset button after short delay
+            setTimeout(() => {
+                buttonElement.innerHTML = originalText;
+                buttonElement.disabled = false;
+            }, 1000);
+        }
     </script>
 </body>
 </html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generated Script</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .script-content { background: #f9f9f9; padding: 20px; border-radius: 5px; white-space: pre-wrap; border-left: 4px solid #d4a574; }
+        .loading { text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="content" class="loading">🤖 Generating your script...</div>
+    </div>
+
+    <script>
+        async function loadScript() {
+            const params = new URLSearchParams(window.location.search);
+            const title = params.get('title');
+            const type = params.get('type');
+            
+            if (!title || !type) {
+                document.getElementById('content').innerHTML = '<h2>Error: Missing parameters</h2>';
+                return;
+            }
+            
+            document.title = `${type.toUpperCase()} Script`;
+            
+            const prompt = type === 'tiktok' 
+                ? `You're a viral tech content creator making short-form videos for YouTube Shorts and TikTok.
+
+Your goal is to turn trending tech topics into engaging 60-second scripts with high watch retention.
+
+Based on this topic: ${title}
+
+Write a full video script for a vertical short-form video (under 60 seconds) that includes:
+
+A strong hook in the first 3 seconds to stop scrolling
+
+Simple, conversational breakdown of what happened and why it matters
+
+A unique or controversial insight (optional but great for comments)
+
+A strong ending with a call to action (CTA) to follow or engage
+
+The tone should be: punchy, confident, and clear — like you're speaking to curious but non-technical people who want to stay ahead of the tech curve.
+
+Output should be formatted clearly with timestamps or sections (e.g., Hook, Breakdown, Insight, CTA).
+
+Add title suggestions, hashtags, and a suggested pinned comment at the end.
+
+If useful, mention what kind of visuals or b-roll would match each section.`
+                : `Create a 5-minute YouTube script about: ${title}. Include intro, main points, and conclusion. Make it informative and engaging. Raw script only`;
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/generate-script', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, type })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('content').innerHTML = `<h2>Error</h2><p>${data.error}</p>`;
+                    return;
+                }
+                
+                document.getElementById('content').innerHTML = `
+                    <h2>${type.toUpperCase()} Script</h2>
+                    <h3>${title}</h3>
+                    <div class="script-content">${data.script}</div>
+                `;
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<h2>Error</h2><p>${error.message}</p>`;
+            }
+        }
+        
+        loadScript();
+    </script>
+</body>
+</html>

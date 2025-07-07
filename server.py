@@ -9,6 +9,9 @@ from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 from dotenv import load_dotenv
 
+load_dotenv()
+from dotenv import load_dotenv
+
 # Load environment variables
 load_dotenv()
 
@@ -24,6 +27,68 @@ class CrawlerHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(trending).encode())
         else:
             super().do_GET()
+    
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+    
+    def do_POST(self):
+        if self.path == '/api/generate-script':
+            try:
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+                
+                script = self.generate_script_with_gemini(data['prompt'])
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                
+                self.wfile.write(json.dumps({'script': script}).encode())
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': str(e)}).encode())
+    
+    def generate_script_with_gemini(self, prompt):
+        api_key = os.getenv('GOOGLE_GEMINI_API_KEY')
+        if not api_key:
+            return "Error: Gemini API key not found"
+        
+        try:
+            url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+            payload = {
+                "contents": [{
+                    "parts": [{
+                        "text": prompt
+                    }]
+                }]
+            }
+            
+            print(f"Sending request to: {url}")
+            print(f"Payload: {json.dumps(payload, indent=2)}")
+            
+            req = urllib.request.Request(url, 
+                data=json.dumps(payload).encode('utf-8'),
+                headers={
+                    'Content-Type': 'application/json',
+                    'X-goog-api-key': api_key
+                })
+            
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                print(f"Response: {json.dumps(result, indent=2)}")
+                return result['candidates'][0]['content']['parts'][0]['text']
+        except Exception as e:
+            print(f"Gemini API Error: {str(e)}")
+            return f"Error generating script: {str(e)}"
     
     def scrape_trending(self):
         categories = {
