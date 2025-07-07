@@ -118,7 +118,7 @@ class CrawlerHandler(http.server.SimpleHTTPRequestHandler):
                                     'title': title.strip(),
                                     'channel': channel.strip(),
                                     'url': f"https://www.youtube.com/watch?v={video_id}",
-                                    'thumbnail': f"https://img.youtube.com/vi/{video_id}/mqdefault.jpg",
+                                    'thumbnail': f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg",
                                     'source': 'YouTube',
                                     'score': view_count,
                                     'engagement': view_count // 100,
