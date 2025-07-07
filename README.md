@@ -1,10 +1,10 @@
 # Tech Buzz Crawler 🚀
 
-A web crawler that aggregates trending tech content from Reddit and YouTube, organized by categories.
+A web crawler that aggregates trending tech content from YouTube, organized by categories.
 
 ## Features
 
-- Scrapes trending tech content from Reddit and YouTube
+- Scrapes trending tech content from YouTube
 - Categorizes content into: AI & ML, Big Tech, Electric Vehicles, Gaming & Hardware, Crypto & Fintech
 - Clean web interface with thumbnails and engagement metrics
 - Auto-refreshes every 5 minutes
