@@ -8,6 +8,8 @@
         body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; background: #f5f5f5; }
         .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .script-content { background: #f9f9f9; padding: 20px; border-radius: 5px; white-space: pre-wrap; border-left: 4px solid #d4a574; }
+        .copy-btn { background: #d4a574; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
+        .copy-btn:hover { background: #c8860d; }
         .loading { text-align: center; color: #666; }
     </style>
 </head>
@@ -73,7 +75,12 @@ A surprising or controversial insight (optional)
 
 A powerful CTA at the end (e.g., “Follow for more” or a question for comments)
 
-Return only the spoken script. At the end, give me:
+Return only the spoken script and you can use the following in it:
+Use <laugh> to add laughter to the speech
+Use <sigh> for a sighing sound
+Other supported tags: <chuckle>, <cough>, <sniffle>, <groan>, <yawn>, <gasp>
+    
+At the end, give me:
 
 3 title suggestions
 
@@ -139,7 +146,8 @@ A pinned comment suggestion that encourages discussion`;
                 document.getElementById('content').innerHTML = `
                     <h2>${type.toUpperCase()} Script</h2>
                     <h3><a href="${videoUrl}" target="_blank">${videoUrl}</a></h3>
-                    <div class="script-content">${data.script}</div>
+                    <button class="copy-btn" onclick="copyScript()">📋 Copy Script</button>
+                    <div class="script-content" id="script-text">${data.script}</div>
                 `;
             } catch (error) {
                 document.getElementById('content').innerHTML = `<h2>Error</h2><p>${error.message}</p>`;
@@ -147,6 +155,23 @@ A pinned comment suggestion that encourages discussion`;
         }
         
         loadScript();
+        
+        function copyScript() {
+            const scriptText = document.getElementById('script-text').innerText;
+            navigator.clipboard.writeText(scriptText)
+                .then(() => {
+                    const copyBtn = document.querySelector('.copy-btn');
+                    const originalText = copyBtn.innerText;
+                    copyBtn.innerText = '✅ Copied!';
+                    setTimeout(() => {
+                        copyBtn.innerText = originalText;
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy script to clipboard');
+                });
+        }
     </script>
 </body>
 </html>

@@ -302,6 +302,6 @@ class CrawlerHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     PORT = 8000
     with socketserver.TCPServer(("", PORT), CrawlerHandler) as httpd:
-        print(f"🚀 Tech Crawler Server running at http://localhost:{PORT}")
+        print(f"Tech Crawler Server running at http://localhost:{PORT}")
         print("Open tech_crawler.html in your browser")
         httpd.serve_forever()
