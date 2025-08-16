@@ -5,11 +5,9 @@ import json
 import urllib.request
 import re
 import os
+import subprocess
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
-from dotenv import load_dotenv
-
-load_dotenv()
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -76,6 +74,75 @@ class CrawlerHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 self.wfile.write(json.dumps({'error': str(e)}).encode())
+        elif self.path == '/api/download-video':
+            try:
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+                
+                video_url = data.get('url')
+                if not video_url:
+                    self.send_error_response("Missing video URL")
+                    return
+                
+                # Extract video ID
+                video_id = None
+                if 'youtube.com/watch?v=' in video_url:
+                    video_id = video_url.split('v=')[1].split('&')[0]
+                elif 'youtu.be/' in video_url:
+                    video_id = video_url.split('youtu.be/')[1].split('?')[0]
+                
+                if not video_id:
+                    self.send_error_response("Could not extract video ID from URL")
+                    return
+                
+                # Create downloads directory if it doesn't exist
+                # Use absolute path to the TechRadar directory to avoid permission issues
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                downloads_dir = os.path.join(script_dir, "downloads")
+                if not os.path.exists(downloads_dir):
+                    os.makedirs(downloads_dir)
+                
+                # Download video using yt-dlp (must be installed)
+                try:
+                    output_path = os.path.join(downloads_dir, f"{video_id}.mp4")
+                    
+                    # Use yt-dlp to download the video in 720p
+                    cmd = [
+                        "yt-dlp", 
+                        "-f", "best[height<=720]", 
+                        "-o", output_path,
+                        video_url
+                    ]
+                    
+                    process = subprocess.Popen(
+                        cmd, 
+                        stdout=subprocess.PIPE, 
+                        stderr=subprocess.PIPE
+                    )
+                    stdout, stderr = process.communicate()
+                    
+                    if process.returncode != 0:
+                        self.send_error_response(f"Download failed: {stderr.decode()}")
+                        return
+                    
+                    # Return success with file path
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/json')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    
+                    response = {
+                        'success': True,
+                        'message': 'Video downloaded successfully',
+                        'file_path': f"/downloads/{video_id}.mp4"
+                    }
+                    self.wfile.write(json.dumps(response).encode())
+                    
+                except Exception as e:
+                    self.send_error_response(f"Download error: {str(e)}")
+            except Exception as e:
+                self.send_error_response(f"Server error: {str(e)}")
     
     def get_youtube_transcript(self, url):
         try:
@@ -139,6 +206,13 @@ class CrawlerHandler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             print(f"Gemini API Error: {str(e)}")
             return f"Error generating script: {str(e)}"
+    
+    def send_error_response(self, message):
+        self.send_response(400)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(json.dumps({'success': False, 'error': message}).encode())
     
     def scrape_trending(self):
         categories = {
